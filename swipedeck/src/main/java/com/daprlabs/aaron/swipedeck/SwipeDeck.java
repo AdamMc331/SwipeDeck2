@@ -67,9 +67,9 @@ public class SwipeDeck extends FrameLayout {
 
             @Override
             public void itemAddedFront(Object item) {
-                deck.getFront().setSwipeEnabled(true);
+                deck.getFirst().setSwipeEnabled(true);
                 if (deck.size() > NUMBER_OF_SIMULTANEOUS_CARDS) {
-                    deck.removeBack();
+                    deck.removeLast();
                     adapterIndex--;
                 }
                 renderDeck();
@@ -77,7 +77,7 @@ public class SwipeDeck extends FrameLayout {
 
             @Override
             public void itemAddedBack(Object item) {
-                deck.getFront().setSwipeEnabled(true);
+                deck.getFirst().setSwipeEnabled(true);
                 renderDeck();
             }
 
@@ -87,7 +87,7 @@ public class SwipeDeck extends FrameLayout {
                 buffer.add(container);
                 //enable swipe in the next cardContainer
                 if (deck.size() > 0) {
-                    deck.getFront().setSwipeEnabled(true);
+                    deck.getFirst().setSwipeEnabled(true);
                 }
                 container.cleanupAndRemoveView();
                 //pull in the next view (if available)
@@ -221,7 +221,7 @@ public class SwipeDeck extends FrameLayout {
 
             card.setId(viewId);
 
-            deck.addBack(card);
+            deck.addLast(card);
             adapterIndex++;
         }
     }
@@ -234,7 +234,7 @@ public class SwipeDeck extends FrameLayout {
         //if there's a card on the deck get the card before it, otherwise the last card is one
         //before the adapter index.
         if (deck.size() > 0) {
-            positionOfLastCard = deck.getFront().getPositionWithinAdapter() - 1;
+            positionOfLastCard = deck.getFirst().getPositionWithinAdapter() - 1;
         } else {
             positionOfLastCard = adapterIndex - 1;
         }
@@ -259,7 +259,7 @@ public class SwipeDeck extends FrameLayout {
 
             card.setId(viewId);
 
-            deck.addFront(card);
+            deck.addFirst(card);
             card.setPositionWithinAdapter(positionOfLastCard);
         }
     }
@@ -332,7 +332,7 @@ public class SwipeDeck extends FrameLayout {
             if (callback != null) {
                 callback.cardSwipedLeft(deck.get(0).getId());
             }
-            deck.removeFront();
+            deck.removeFirst();
         }
     }
 
@@ -347,7 +347,7 @@ public class SwipeDeck extends FrameLayout {
             if (callback != null) {
                 callback.cardSwipedRight(deck.get(0).getId());
             }
-            deck.removeFront();
+            deck.removeFirst();
         }
     }
 
@@ -370,7 +370,7 @@ public class SwipeDeck extends FrameLayout {
      */
     public long getTopCardItemId() {
         if (deck.size() > 0) {
-            return deck.getFront().getId();
+            return deck.getFirst().getId();
         } else {
             return -1;
         }
@@ -424,10 +424,10 @@ public class SwipeDeck extends FrameLayout {
         @Override
         public void cardSwipedLeft(View card) {
             Log.d(TAG, "card swiped left");
-            if (!(deck.getFront().getCard() == card)) {
+            if (!(deck.getFirst().getCard() == card)) {
                 Log.e("SWIPE ERROR: ", "card on top of deck not equal to card swiped");
             }
-            deck.removeFront();
+            deck.removeFirst();
             if (callback != null) {
                 callback.cardSwipedLeft(viewId);
             }
@@ -436,10 +436,10 @@ public class SwipeDeck extends FrameLayout {
         @Override
         public void cardSwipedRight(View card) {
             Log.d(TAG, "card swiped right");
-            if (!(deck.getFront().getCard() == card)) {
+            if (!(deck.getFirst().getCard() == card)) {
                 Log.e("SWIPE ERROR: ", "card on top of deck not equal to card swiped");
             }
-            deck.removeFront();
+            deck.removeFirst();
             if (callback != null) {
                 callback.cardSwipedRight(viewId);
             }
