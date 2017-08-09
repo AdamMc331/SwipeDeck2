@@ -17,7 +17,7 @@ public class SwipeDeckCustom extends SwipeDeck {
         int offset = position * 15;
         float scale = (card.getMeasuredWidth() - offset) / (float) card.getMeasuredWidth();
         card.animate()
-                .setDuration(ANIMATION_DURATION)
+                .setDuration(Companion.getANIMATION_DURATION())
                 .y(getPaddingTop() + offset)
                 .scaleX(scale)
                 .scaleY(scale)
