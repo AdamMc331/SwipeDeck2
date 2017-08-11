@@ -5,7 +5,7 @@ import com.daprlabs.aaron.swipedeck.Utility.SwipeListener
 
 import android.view.View
 
-class CardContainer(
+open class CardContainer(
         val card: View?,
         private val parent: SwipeDeck,
         callback: SwipeCallback) {

@@ -11,7 +11,7 @@ import com.daprlabs.aaron.swipedeck.SwipeDeck
 
 class SwipeListener(
         private val card: View?,
-        internal var callback: SwipeCallback,
+        private var callback: SwipeCallback,
         private val initialX: Int,
         private val initialY: Int,
         private val parent: SwipeDeck,
@@ -87,7 +87,6 @@ class SwipeListener(
                 //calc rotation here
                 val x = card?.x ?: 0F
                 val y = card?.y ?: 0F
-                val width = card?.width ?: 0
 
                 val posX = x + dx
                 val posY = y + dy
@@ -96,18 +95,16 @@ class SwipeListener(
                 card?.y = posY
 
                 //card.setRotation
-                val distobjectX = posX - initialX
-                val rotation = rotationDegrees * 2f * distobjectX / parent.width
+                val distObjectX = posX - initialX
+                val rotation = rotationDegrees * 2f * distObjectX / parent.width
                 card?.rotation = rotation
 
-                if (rightView != null && leftView != null) {
-                    //set alpha of left and right image
-                    val alpha = (posX - parent.paddingLeft) / (parent.width * opacityEnd)
-                    //float alpha = (((posX - paddingLeft) / parentWidth) * ALPHA_MAGNITUDE );
-                    //Log.i("alpha: ", Float.toString(alpha));
-                    rightView?.alpha = alpha
-                    leftView?.alpha = -alpha
-                }
+                //set alpha of left and right image
+                val alpha = (posX - parent.paddingLeft) / (parent.width * opacityEnd)
+                //float alpha = (((posX - paddingLeft) / parentWidth) * ALPHA_MAGNITUDE );
+                //Log.i("alpha: ", Float.toString(alpha));
+                rightView?.alpha = alpha
+                leftView?.alpha = -alpha
             }
 
             MotionEvent.ACTION_UP -> {
@@ -134,46 +131,30 @@ class SwipeListener(
 
     fun checkCardForEvent() {
 
+        val listener = object : Animator.AnimatorListener {
+
+            override fun onAnimationStart(animation: Animator) {
+
+            }
+
+            override fun onAnimationEnd(animation: Animator) {
+                callback.cardOffScreen(card)
+            }
+
+            override fun onAnimationCancel(animation: Animator) {
+                Log.d("SwipeListener", "Animation Cancelled")
+            }
+
+            override fun onAnimationRepeat(animation: Animator) {}
+        }
+
+        //TODO: Single callback
         if (cardBeyondLeftBorder()) {
-            animateOffScreenLeft(SwipeDeck.ANIMATION_DURATION)
-                    ?.setListener(object : Animator.AnimatorListener {
-
-                        override fun onAnimationStart(animation: Animator) {
-
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            callback.cardOffScreen(card)
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-                            Log.d("SwipeListener", "Animation Cancelled")
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator) {}
-                    })
+            animateOffScreenLeft(SwipeDeck.ANIMATION_DURATION)?.setListener(listener)
             callback.cardSwipedLeft(card)
             this.deactivated = true
         } else if (cardBeyondRightBorder()) {
-            animateOffScreenRight(SwipeDeck.ANIMATION_DURATION)
-                    ?.setListener(object : Animator.AnimatorListener {
-
-                        override fun onAnimationStart(animation: Animator) {
-
-                        }
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            callback.cardOffScreen(card)
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator) {
-
-                        }
-                    })
+            animateOffScreenRight(SwipeDeck.ANIMATION_DURATION)?.setListener(listener)
             callback.cardSwipedRight(card)
             this.deactivated = true
         } else {
@@ -213,19 +194,19 @@ class SwipeListener(
     }
 
     private fun animateOffScreenLeft(duration: Int): ViewPropertyAnimator? {
-        return card?.animate()
-                ?.setDuration(duration.toLong())
-                ?.x((-parent.width).toFloat())
-                ?.y(0f)
-                ?.rotation(-30f)
+        return animateOffScreen(duration.toLong(), (-parent.width).toFloat(), 0F, 30F)
     }
 
     private fun animateOffScreenRight(duration: Int): ViewPropertyAnimator? {
+        return animateOffScreen(duration.toLong(), (parent.width * 2).toFloat(), 0F, 30F)
+    }
+
+    private fun animateOffScreen(duration: Long, x: Float, y: Float, rotation: Float): ViewPropertyAnimator? {
         return card?.animate()
-                ?.setDuration(duration.toLong())
-                ?.x((parent.width * 2).toFloat())
-                ?.y(0f)
-                ?.rotation(30f)
+                ?.setDuration(duration)
+                ?.x(x)
+                ?.y(y)
+                ?.rotation(rotation)
     }
 
     fun swipeCardLeft(duration: Int) {
