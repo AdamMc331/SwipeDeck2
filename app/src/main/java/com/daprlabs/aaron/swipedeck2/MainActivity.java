@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        cardStack.setLeftImage(R.id.left_image);
-        cardStack.setRightImage(R.id.right_image);
+        cardStack.setLeftImageResource(R.id.left_image);
+        cardStack.setRightImageResource(R.id.right_image);
 
         Button btn = (Button) findViewById(R.id.button_left);
         btn.setOnClickListener(new View.OnClickListener() {

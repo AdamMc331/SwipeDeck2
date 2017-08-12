@@ -10,7 +10,7 @@ import java.util.*
  * @property[listener] The interface used for callbacks when items are added/removed.
  * @property[internal] The LinkedList of type T items.
  */
-class Deck<T : SwipeCard>(private val listener: DeckEventListener) {
+class Deck<T : SwipeCard>(private val listener: DeckEventListener<T>) {
 
     private val internal = LinkedList<T>()
 
@@ -110,33 +110,33 @@ class Deck<T : SwipeCard>(private val listener: DeckEventListener) {
     /**
      * Callback used as the contents of the deck changed.
      */
-    interface DeckEventListener {
+    interface DeckEventListener<in T: SwipeCard> {
         /**
          * Called when an item is added to the front of the deck.
          *
          * @param[item] The item that was added.
          */
-        fun itemAddedFront(item: Any)
+        fun itemAddedFront(item: T)
 
         /**
          * Called when an item is added to the back of the deck.
          *
          * @param[item] The item that was added.
          */
-        fun itemAddedBack(item: Any)
+        fun itemAddedBack(item: T)
 
         /**
          * Called when an item is removed from the front of the deck.
          *
          * @param[item] The item that was removed.
          */
-        fun itemRemovedFront(item: Any)
+        fun itemRemovedFront(item: T)
 
         /**
          * Called when an item is removed from the back of the deck.
          *
          * @param[item] The item that was removed.
          */
-        fun itemRemovedBack(item: Any)
+        fun itemRemovedBack(item: T)
     }
 }

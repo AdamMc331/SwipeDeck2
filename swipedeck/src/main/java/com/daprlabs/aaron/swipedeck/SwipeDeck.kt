@@ -48,8 +48,8 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
     private var adapter: Adapter? = null
     private var observer: DataSetObserver? = null
     private var callback: SwipeDeckCallback? = null
-    private var leftImageResource: Int = 0
-    private var rightImageResource: Int = 0
+    var leftImageResource: Int = 0
+    var rightImageResource: Int = 0
 
     var endOpacity: Float = 0F
     var rotationDegrees: Float = 0F
@@ -71,8 +71,8 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
         swipeEnabled = a.getBoolean(R.styleable.SwipeDeck2_swipe_enabled, true)
         previewLayoutId = a.getResourceId(R.styleable.SwipeDeck2_preview_layout, -1)
 
-        deck = Deck<SwipeCard>(object : Deck.DeckEventListener {
-            override fun itemAddedFront(item: Any) {
+        deck = Deck<SwipeCard>(object : Deck.DeckEventListener<SwipeCard> {
+            override fun itemAddedFront(item: SwipeCard) {
                 deck.first?.setSwipeEnabled(swipeEnabled)
 
                 // If our deck is too large now, remove the last item.
@@ -83,44 +83,39 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
                 renderDeck()
             }
 
-            //TODO: Figure out why this doesn't care about deck size?
-            override fun itemAddedBack(item: Any) {
+            //TODO: Figure out why this doesn't care about deck size? Why does it set the first enabled?
+            override fun itemAddedBack(item: SwipeCard) {
                 deck.first?.setSwipeEnabled(swipeEnabled)
                 renderDeck()
             }
 
-            override fun itemRemovedFront(item: Any) {
-                val container = item as SwipeCard
-
-                buffer.add(container)
-                //enable swipe in the next cardContainer
+            override fun itemRemovedFront(item: SwipeCard) {
+                buffer.add(item)
                 deck.first?.setSwipeEnabled(swipeEnabled)
 
-                container.cleanupAndRemoveView()
-                //pull in the next view (if available)
+                item.cleanupAndRemoveView()
                 addNextView()
                 renderDeck()
             }
 
-            override fun itemRemovedBack(item: Any) {
-                (item as SwipeCard).card
+            override fun itemRemovedBack(item: SwipeCard) {
+                item.card
                         ?.animate()
                         ?.setDuration(100)
                         ?.alpha(0f)
             }
         })
 
-        //set clipping of view parent to false so cards render outside their view boundary
-        //make sure not to clip to padding
+        // Set clipping of view parent to false so cards can render outside their boundary.
+        // Make sure not to clip to padding.
         clipToPadding = false
         clipChildren = false
         this.setWillNotDraw(false)
 
-        //if render above is set make sure everything in this view renders above other views
-        //outside of it.
+        // If render above is set make sure everything in this view renders above other views.
         if (renderAbove) {
             ViewCompat.setTranslationZ(this, java.lang.Float.MAX_VALUE)
-        }//todo: make an else here possibly
+        }
     }
 
     override fun onAttachedToWindow() {
@@ -161,7 +156,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
                         addNextView()
                     }
                 }
-                //if the adapter has been emptied empty the view and reset adapterIndex
+                // If the adapter has been emptied empty the view and reset adapterIndex
                 if (adapter.count == 0) {
                     deck.clear()
                     adapterIndex = 0
@@ -169,8 +164,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
             }
 
             override fun onInvalidated() {
-                //reset state, remove views and request layout
-                //nextAdapterCard = 0;
+                // Reset state, remove views and request layout
                 deck.clear()
                 removeAllViews()
                 requestLayout()
@@ -185,24 +179,28 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
 
         if (isInEditMode) return
 
-        // if we don't have an adapter, we don't need to do anything
+        // If we don't have an adapter, we don't need to do anything
         if (adapter == null || adapter?.count == 0) {
-            //nextAdapterCard = 0;
             removeAllViewsInLayout()
             return
         }
-        //pull in views from the adapter at the position the top of the deck is set to
-        //stop when you get to for cards or the end of the adapter
+
+        // Pull in views from the adapter at the position the top of the deck is set to
+        // stop when you get to for cards or the end of the adapter.
         val deckSize = deck.size()
         for (i in deckSize..numberOfSimultaneousCards - 1) {
             addNextView()
         }
     }
 
+    /**
+     * TODO: Investigate the difference between this and addLastView and see if anything can be abstracted out.
+     */
     private fun addNextView() {
         if (adapterIndex < (adapter?.count ?: 0)) {
             val newBottomChild = adapter?.getView(adapterIndex, null, this)
             newBottomChild?.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
             //todo: i'm setting the swipeCard to invisible initially and making it visible when i animate
             //later
             newBottomChild?.alpha = 0f
@@ -216,32 +214,33 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
             if (leftImageResource != 0) {
                 card.setLeftImageResource(leftImageResource)
             }
+
             if (rightImageResource != 0) {
                 card.setRightImageResource(rightImageResource)
             }
 
             card.id = viewId
-
             deck.addLast(card)
             adapterIndex++
         }
     }
 
-
     private fun addLastView() {
-        //get the position of the swipeCard prior to the swipeCard atop the deck
+        // Get the position of the swipeCard prior to the swipeCard atop the deck
         val positionOfLastCard: Int
 
-        //if there's a swipeCard on the deck get the swipeCard before it, otherwise the last swipeCard is one
-        //before the adapter index.
+        // If there's a swipeCard on the deck get the swipeCard before it, otherwise the last swipeCard is one
+        // before the adapter index.
         if (deck.size() > 0) {
             positionOfLastCard = deck.first?.positionWithinAdapter?.minus(1) ?: 0
         } else {
             positionOfLastCard = adapterIndex - 1
         }
+
         if (positionOfLastCard >= 0) {
             val newBottomChild = adapter?.getView(positionOfLastCard, null, this)
             newBottomChild?.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
             //todo: i'm setting the swipeCard to invisible initially and making it visible when i animate
             //later
             newBottomChild?.alpha = 0f
@@ -259,15 +258,15 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
             }
 
             card.id = viewId
-
             deck.addFirst(card)
             card.positionWithinAdapter = positionOfLastCard
         }
     }
 
     private fun renderDeck() {
-        //we remove all the views and re add them so that the Z translation is correct
+        // We remove all the views and re add them so that the Z translation is correct
         removeAllViews()
+
         for (i in deck.size() - 1 downTo 0) {
             val container = deck[i]
             val card = container.card
@@ -278,7 +277,8 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
             val itemHeight = height - (paddingTop + paddingBottom)
             card?.measure(View.MeasureSpec.EXACTLY or itemWidth, View.MeasureSpec.EXACTLY or itemHeight)
         }
-        //if there's still a swipeCard animating in the buffer, make sure it's re added after removing all views
+
+        // If there's still a swipeCard animating in the buffer, make sure it's re added after removing all views
         // cards in buffer go from older ones to newer
         // in our deck, newer cards are placed below older cards
         // we need to start with new cards, so older cards would be above them
@@ -316,6 +316,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
 
     /**
      * Swipe top swipeCard to the left side.
+     * TODO: This can be moved to the card and/or deck
      *
      * @param duration animation duration in milliseconds
      */
@@ -329,6 +330,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
 
     /**
      * Swipe swipeCard to the right side.
+     * TODO: This can be moved to the card and/or deck
      *
      * @param duration animation duration in milliseconds
      */
@@ -344,30 +346,8 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
         addLastView()
     }
 
-    /**
-     * Get item id associated with the swipeCard on top of the deck.
-     *
-     * @return item id of the swipeCard on the top of the stack or -1 if deck is empty
-     */
-    val topCardItemId: Long?
-        get() {
-            if (deck.size() > 0) {
-                return deck.first?.id
-            } else {
-                return -1
-            }
-        }
-
     fun removeFromBuffer(container: SwipeCard) {
         this.buffer.remove(container)
-    }
-
-    fun setLeftImage(imageResource: Int) {
-        leftImageResource = imageResource
-    }
-
-    fun setRightImage(imageResource: Int) {
-        rightImageResource = imageResource
     }
 
     private fun setZTranslations() {
