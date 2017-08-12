@@ -320,7 +320,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
      *
      * @param duration animation duration in milliseconds
      */
-    fun swipeTopCardLeft(duration: Long) {
+    fun swipeTopCardLeft(duration: Long = ANIMATION_DURATION) {
         if (deck.size() > 0) {
             deck[0].swipeCardLeft(duration)
             callback?.cardSwipedLeft(deck[0].id)
@@ -334,7 +334,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(
      *
      * @param duration animation duration in milliseconds
      */
-    fun swipeTopCardRight(duration: Long) {
+    fun swipeTopCardRight(duration: Long = ANIMATION_DURATION) {
         if (deck.size() > 0) {
             deck[0].swipeCardRight(duration)
             callback?.cardSwipedRight(deck[0].id)

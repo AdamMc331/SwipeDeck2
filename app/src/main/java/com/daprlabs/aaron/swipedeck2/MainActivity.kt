@@ -12,7 +12,7 @@ import android.widget.TextView
 import com.daprlabs.aaron.swipedeck.SwipeDeck
 import com.squareup.picasso.Picasso
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val cardStack: SwipeDeck by lazy { findViewById(R.id.swipe_deck) as SwipeDeck }
     private val testData: List<String> = (0..9).map { it.toString() }
     private val adapter: SwipeDeckAdapter by lazy { SwipeDeckAdapter(testData, this) }
@@ -20,6 +20,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val leftButton = findViewById(R.id.left_button)
+        val rightButton = findViewById(R.id.right_button)
+        val undoButton = findViewById(R.id.undo_button)
+        leftButton.setOnClickListener(this)
+        rightButton.setOnClickListener(this)
+        undoButton.setOnClickListener(this)
 
         cardStack.setAdapter(adapter)
 
@@ -42,6 +49,14 @@ class MainActivity : AppCompatActivity() {
 
         cardStack.leftImageResource = R.id.left_image
         cardStack.rightImageResource = R.id.right_image
+    }
+
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.left_button -> cardStack.swipeTopCardLeft()
+            R.id.right_button -> cardStack.swipeTopCardRight()
+            R.id.undo_button -> cardStack.unSwipeCard()
+        }
     }
 
     //TODO: Need a ViewHolder.
