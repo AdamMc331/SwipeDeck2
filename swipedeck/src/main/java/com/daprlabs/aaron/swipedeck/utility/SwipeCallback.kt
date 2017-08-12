@@ -3,27 +3,27 @@ package com.daprlabs.aaron.swipedeck.utility
 import android.view.View
 
 /**
- * Callback methods based on the swipe outcome of a card.
+ * Callback methods based on the swipe outcome of a swipeCard.
  */
 interface SwipeCallback {
     /**
-     * Called when a card is swiped to the left.
+     * Called when a swipeCard is swiped to the left.
      *
      * @param[card] The view that was swiped left.
      */
     fun cardSwipedLeft(card: View?)
 
     /**
-     * Called when a card is swiped to the right.
+     * Called when a swipeCard is swiped to the right.
      *
      * @param[card] The view that was swiped right.
      */
     fun cardSwipedRight(card: View?)
 
     /**
-     * Called when a card is moved off the screen.
+     * Called when a swipeCard is moved off the screen.
      *
-     * @param[card] The card that moved.
+     * @param[card] The swipeCard that moved.
      */
     fun cardOffScreen(card: View?)
 

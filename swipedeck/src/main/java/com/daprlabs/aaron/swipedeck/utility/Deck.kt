@@ -1,6 +1,6 @@
 package com.daprlabs.aaron.swipedeck.utility
 
-import com.daprlabs.aaron.swipedeck.CardContainer
+import com.daprlabs.aaron.swipedeck.SwipeCard
 import java.util.*
 
 /**
@@ -10,7 +10,7 @@ import java.util.*
  * @property[listener] The interface used for callbacks when items are added/removed.
  * @property[internal] The LinkedList of type T items.
  */
-class Deck<T : CardContainer>(private val listener: DeckEventListener) {
+class Deck<T : SwipeCard>(private val listener: DeckEventListener) {
 
     private val internal = LinkedList<T>()
 
