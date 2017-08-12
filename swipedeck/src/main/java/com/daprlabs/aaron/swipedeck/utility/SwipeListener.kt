@@ -1,4 +1,4 @@
-package com.daprlabs.aaron.swipedeck.Utility
+package com.daprlabs.aaron.swipedeck.utility
 
 import android.animation.Animator
 import android.util.Log
@@ -8,7 +8,24 @@ import android.view.ViewPropertyAnimator
 import android.view.animation.OvershootInterpolator
 import com.daprlabs.aaron.swipedeck.SwipeDeck
 
-
+/**
+ * A listener for swipe actions on a card.
+ *
+ * @property[card] The card that this listener monitors.
+ * @property[callback] The callback for swipe actions on the [card].
+ * @property[initialX] The initial X coordinate of the card on the screen.
+ * @property[initialY] The initial Y coordinator of the card on the screen.
+ * @property[parent] The [SwipeDeck] that this card belongs in.
+ * @property[opacityEnd] The opacity this card will have at the end of its swipe.
+ * @property[rotationDegrees] The degrees this card should rotate as it is swiped.
+ * @property[mActivePointerId] The current pointer for the motion event as a card is being swiped.
+ * @property[initialXPress] The X coordinate of the initial press on the card.
+ * @property[initialYPress] The Y coordinate of the initial press on the card.
+ * @property[deactivated] Whether or not this card is deactivated from being swiped.
+ * @property[rightView] The view to display on the card as it is swiped right.
+ * @property[leftView] The view to display on the card as it is swiped left.
+ * @property[click] Whether this was a click on the card or a swipe instead.
+ */
 class SwipeListener(
         private val card: View?,
         private var callback: SwipeCallback,
@@ -129,8 +146,12 @@ class SwipeListener(
         return true
     }
 
+    /**
+     * Checks if we should preform a full left or right swipe.
+     */
     fun checkCardForEvent() {
 
+        //TODO: More logging.
         val listener = object : Animator.AnimatorListener {
 
             override fun onAnimationStart(animation: Animator) {
@@ -148,7 +169,6 @@ class SwipeListener(
             override fun onAnimationRepeat(animation: Animator) {}
         }
 
-        //TODO: Single callback
         if (cardBeyondLeftBorder()) {
             animateOffScreenLeft(SwipeDeck.ANIMATION_DURATION)?.setListener(listener)
             callback.cardSwipedLeft(card)
@@ -162,6 +182,11 @@ class SwipeListener(
         }
     }
 
+    /**
+     * Determines if a card is beyond the left border.
+     *
+     * @return True if the card is beyond the left quarter of the screen.
+     */
     private fun cardBeyondLeftBorder(): Boolean {
         //check if cards middle is beyond the left quarter of the screen
         val x = card?.x ?: 0F
@@ -171,6 +196,11 @@ class SwipeListener(
     }
 
     //TODO: Abstract these two methods
+    /**
+     * Determines if a card is beyond the right border.
+     *
+     * @return True if the card is beyond the right quarter of the screen.
+     */
     private fun cardBeyondRightBorder(): Boolean {
         //check if card middle is beyond the right quarter of the screen
         val x = card?.x ?: 0F
@@ -179,6 +209,11 @@ class SwipeListener(
         return x + width / 2 > parent.width / 4f * 3
     }
 
+    /**
+     * Resets the card to its original position.
+     *
+     * @return An Animator that animates the card back to its original spot.
+     */
     private fun resetCardPosition(): ViewPropertyAnimator? {
         rightView?.alpha = 0F
         leftView?.alpha = 0F
@@ -193,14 +228,34 @@ class SwipeListener(
                 ?.translationX(0f)
     }
 
+    /**
+     * Animates the card until it is off the left of the screen.
+     *
+     * @return An animator that animates the card off screen.
+     */
     private fun animateOffScreenLeft(duration: Int): ViewPropertyAnimator? {
         return animateOffScreen(duration.toLong(), (-parent.width).toFloat(), 0F, 30F)
     }
 
+    /**
+     * Animates the card until it is off the right of the screen.
+     *
+     * @return An animator that animates the card off screen.
+     */
     private fun animateOffScreenRight(duration: Int): ViewPropertyAnimator? {
         return animateOffScreen(duration.toLong(), (parent.width * 2).toFloat(), 0F, 30F)
     }
 
+    /**
+     * Animates the card off screen.
+     *
+     * @param[duration] The time (in MS) to run the animation.
+     * @param[x] The X coordinate to animate the card to.
+     * @param[y] The Y coordinate to animate the card to.
+     * @param[rotation] The rotation that should be applied to the card.
+     *
+     * @return An animator that animates the card off screen.
+     */
     private fun animateOffScreen(duration: Long, x: Float, y: Float, rotation: Float): ViewPropertyAnimator? {
         return card?.animate()
                 ?.setDuration(duration)
@@ -209,18 +264,38 @@ class SwipeListener(
                 ?.rotation(rotation)
     }
 
+    /**
+     * Swipes the card off to the left.
+     *
+     * @param[duration] The length of time (in MS) the swipe should take.
+     */
     fun swipeCardLeft(duration: Int) {
         animateOffScreenLeft(duration)
     }
 
+    /**
+     * Swipes the card off to the right.
+     *
+     * @param[duration] The length of time (in MS) the swipe should take.
+     */
     fun swipeCardRight(duration: Int) {
         animateOffScreenRight(duration)
     }
 
+    /**
+     * Sets the [rightView].
+     *
+     * @param[image] The image to display when a card is swiped right.
+     */
     fun setRightView(image: View?) {
         this.rightView = image
     }
 
+    /**
+     * Sets the [leftView].
+     *
+     * @param[image] The image to display when a card is swiped left.
+     */
     fun setLeftView(image: View?) {
         this.leftView = image
     }

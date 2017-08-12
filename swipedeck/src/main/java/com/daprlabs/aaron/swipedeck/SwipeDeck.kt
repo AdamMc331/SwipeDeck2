@@ -3,6 +3,7 @@ package com.daprlabs.aaron.swipedeck
 import android.content.Context
 import android.database.DataSetObserver
 import android.os.Build
+import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.Log
@@ -12,11 +13,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Adapter
 import android.widget.FrameLayout
-import com.daprlabs.aaron.swipedeck.Utility.Deck
-import com.daprlabs.aaron.swipedeck.Utility.SwipeCallback
+import com.daprlabs.aaron.swipedeck.utility.Deck
+import com.daprlabs.aaron.swipedeck.utility.SwipeCallback
 import java.util.*
 
-open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(context, attrs) {
+/**
+ * Maintains a deck of cards that can be swiped.
+ *
+ * @property[previewLayoutId] Preview layout when card is attached??
+ * @property[numberOfSimultaneousCards] The number of cards that will be seen in the stack at a time.
+ * @property[cardSpacing] The spacing between each card.
+ * @property[buffer] The cards to be displayed. TODO: Discover how this is different from deck.
+ * @property[deck] The cards to be displayed. TODO: Discover how this is different from buffer.
+ * @property[mHasStableIds] Whether [adapter] has stable IDs or not.
+ * @property[adapter] An adapter for all the cards to display.
+ * @property[observer] A watcher that handles changes to the dataset.
+ * @property[callback] The callback to use when cards are swiped. TODO: This exists in CardContainer.
+ * @property[leftImageResource] The image resource on the left of a card. TODO: This exists in CardContainer.
+ * @property[rightImageResource] The image resource on the right of a card. TODO: This exists in CardContainer.
+ * @property[endOpacity] The opacity of the card at the end of a swipe.
+ * @property[rotationDegrees] The degrees a card should rotate as its being swiped.
+ * @property[renderAbove] Whether the swipe deck should be rendered above everything else.
+ * @property[swipeEnabled] Whether or not the cards can be swiped.
+ * @property[adapterIndex] The current index of [adapter].
+ */
+open class SwipeDeck(context: Context, attrs: AttributeSet) : CoordinatorLayout(context, attrs) {
     private val previewLayoutId: Int
     private val numberOfSimultaneousCards: Int
     private val cardSpacing: Float
@@ -24,7 +45,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
     private lateinit var deck: Deck<CardContainer>
     private var mHasStableIds: Boolean = false
-    private var mAdapter: Adapter? = null
+    private var adapter: Adapter? = null
     private var observer: DataSetObserver? = null
     private var callback: SwipeDeckCallback? = null
     private var leftImageResource: Int = 0
@@ -52,8 +73,9 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
         deck = Deck<CardContainer>(object : Deck.DeckEventListener {
             override fun itemAddedFront(item: Any) {
-                deck.first?.setSwipeEnabled(true)
+                deck.first?.setSwipeEnabled(swipeEnabled)
 
+                // If our deck is too large now, remove the last item.
                 if (deck.size() > numberOfSimultaneousCards) {
                     deck.removeLast()
                     adapterIndex--
@@ -61,8 +83,9 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
                 renderDeck()
             }
 
+            //TODO: Figure out why this doesn't care about deck size?
             override fun itemAddedBack(item: Any) {
-                deck.first?.setSwipeEnabled(true)
+                deck.first?.setSwipeEnabled(swipeEnabled)
                 renderDeck()
             }
 
@@ -71,7 +94,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
                 buffer.add(container)
                 //enable swipe in the next cardContainer
-                deck.first?.setSwipeEnabled(true)
+                deck.first?.setSwipeEnabled(swipeEnabled)
 
                 container.cleanupAndRemoveView()
                 //pull in the next view (if available)
@@ -120,10 +143,10 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
     }
 
     fun setAdapter(adapter: Adapter) {
-        this.mAdapter?.unregisterDataSetObserver(observer)
+        this.adapter?.unregisterDataSetObserver(observer)
 
         mHasStableIds = adapter.hasStableIds()
-        mAdapter = adapter
+        this.adapter = adapter
         observer = object : DataSetObserver() {
             override fun onChanged() {
                 super.onChanged()
@@ -163,7 +186,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
         if (isInEditMode) return
 
         // if we don't have an adapter, we don't need to do anything
-        if (mAdapter == null || mAdapter?.count == 0) {
+        if (adapter == null || adapter?.count == 0) {
             //nextAdapterCard = 0;
             removeAllViewsInLayout()
             return
@@ -177,14 +200,14 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
     }
 
     private fun addNextView() {
-        if (adapterIndex < (mAdapter?.count ?: 0)) {
-            val newBottomChild = mAdapter?.getView(adapterIndex, null, this)
+        if (adapterIndex < (adapter?.count ?: 0)) {
+            val newBottomChild = adapter?.getView(adapterIndex, null, this)
             newBottomChild?.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             //todo: i'm setting the card to invisible initially and making it visible when i animate
             //later
             newBottomChild?.alpha = 0f
             newBottomChild?.y = paddingTop.toFloat()
-            val viewId = mAdapter?.getItemId(adapterIndex) ?: 0
+            val viewId = adapter?.getItemId(adapterIndex) ?: 0
 
             val card = CardContainer(newBottomChild, this, CardContainerCallback(viewId))
 
@@ -217,14 +240,14 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
             positionOfLastCard = adapterIndex - 1
         }
         if (positionOfLastCard >= 0) {
-            val newBottomChild = mAdapter?.getView(positionOfLastCard, null, this)
+            val newBottomChild = adapter?.getView(positionOfLastCard, null, this)
             newBottomChild?.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             //todo: i'm setting the card to invisible initially and making it visible when i animate
             //later
             newBottomChild?.alpha = 0f
             newBottomChild?.y = paddingTop.toFloat()
 
-            val viewId = mAdapter?.getItemId(positionOfLastCard) ?: 0
+            val viewId = adapter?.getItemId(positionOfLastCard) ?: 0
 
             val card = CardContainer(newBottomChild, this, CardContainerCallback(viewId))
 
@@ -293,7 +316,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
     /**
      * Swipe top card to the left side.
-
+     *
      * @param duration animation duration in milliseconds
      */
     fun swipeTopCardLeft(duration: Int) {
@@ -306,7 +329,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
     /**
      * Swipe card to the right side.
-
+     *
      * @param duration animation duration in milliseconds
      */
     fun swipeTopCardRight(duration: Int) {
@@ -323,7 +346,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
     /**
      * Get item id associated with the card on top of the deck.
-
+     *
      * @return item id of the card on the top of the stack or -1 if deck is empty
      */
     val topCardItemId: Long?
@@ -364,7 +387,7 @@ open class SwipeDeck(context: Context, attrs: AttributeSet) : FrameLayout(contex
 
         /**
          * Check whether we can start dragging view with provided id.
-
+         *
          * @param itemId id of the card returned by adapter's [Adapter.getItemId]
          * *
          * @return true if we can start dragging view, false otherwise

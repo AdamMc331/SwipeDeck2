@@ -1,4 +1,4 @@
-package com.daprlabs.aaron.swipedeck.Utility
+package com.daprlabs.aaron.swipedeck.utility
 
 import com.daprlabs.aaron.swipedeck.CardContainer
 import java.util.*

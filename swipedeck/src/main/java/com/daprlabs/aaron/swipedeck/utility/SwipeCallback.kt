@@ -1,4 +1,4 @@
-package com.daprlabs.aaron.swipedeck.Utility
+package com.daprlabs.aaron.swipedeck.utility
 
 import android.view.View
 
