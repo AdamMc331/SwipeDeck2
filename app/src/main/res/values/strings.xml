@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SwipeDeck2</string>
+    <string name="card_image">Card Image</string>
+    <string name="left_image">Left Image</string>
+    <string name="right_image">Right Image</string>
+    <string name="sample_text">Sample Text</string>
 </resources>

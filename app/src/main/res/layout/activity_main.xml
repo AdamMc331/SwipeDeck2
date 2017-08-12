@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.daprlabs.aaron.swipedeck.layouts.SwipeFrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.daprlabs.aaron.swipedeck.layouts.SwipeCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:swipedeck="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/swipeLayout"
     android:orientation="vertical">
 
     <com.daprlabs.aaron.swipedeck.SwipeDeck
@@ -15,36 +14,36 @@
         android:paddingLeft="50dp"
         android:paddingRight="50dp"
         android:paddingTop="96dp"
-        swipedeck:max_visible="3"
-        swipedeck:render_above="false"
         swipedeck:card_spacing="15dp"
-        swipedeck:preview_layout="@layout/test_card2"/>
+        swipedeck:max_visible="3"
+        swipedeck:preview_layout="@layout/card_layout"
+        swipedeck:render_above="false" />
 
-    <Button
-        android:id="@+id/button_left"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="swipe left" />
-    <Button
-        android:id="@+id/button_center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:text="add card" />
-    <Button
-        android:id="@+id/button_right"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:text="swipe right" />
+    <!--<Button-->
+    <!--android:id="@+id/button_left"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom"-->
+    <!--android:text="swipe left" />-->
+    <!--<Button-->
+    <!--android:id="@+id/button_center"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom|center"-->
+    <!--android:text="add card" />-->
+    <!--<Button-->
+    <!--android:id="@+id/button_right"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="bottom|right"-->
+    <!--android:text="swipe right" />-->
 
-    <CheckBox
-        android:id="@+id/checkbox_drag"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:checked="true"
-        android:text="Drag enabled"/>
+    <!--<CheckBox-->
+    <!--android:id="@+id/checkbox_drag"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_gravity="top|left"-->
+    <!--android:checked="true"-->
+    <!--android:text="Drag enabled"/>-->
 
-</com.daprlabs.aaron.swipedeck.layouts.SwipeFrameLayout>
+</com.daprlabs.aaron.swipedeck.layouts.SwipeCoordinatorLayout>
